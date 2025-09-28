@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clozemaster Shortcut Options</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; max-width: 800px; }
+    .rule-container { 
+      border: 1px solid #ddd; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 5px; 
+      cursor: grab;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .rule-container:active { cursor: grabbing; }
+    .rule-container.dragging { 
+      opacity: 0.5; 
+      transform: rotate(5deg);
+      z-index: 1000;
+    }
+    .rule-container.drag-over { 
+      border-color: #2196F3; 
+      border-width: 2px;
+      background-color: #f0f8ff;
+    }
+    .drag-handle {
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 14px;
+      cursor: grab;
+      user-select: none;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: 
+        radial-gradient(circle at 3px 3px, #999 1px, transparent 1px),
+        radial-gradient(circle at 3px 9px, #999 1px, transparent 1px),
+        radial-gradient(circle at 3px 15px, #999 1px, transparent 1px),
+        radial-gradient(circle at 9px 3px, #999 1px, transparent 1px),
+        radial-gradient(circle at 9px 9px, #999 1px, transparent 1px),
+        radial-gradient(circle at 9px 15px, #999 1px, transparent 1px);
+      background-size: 12px 18px;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .rule-content {
+      margin-left: 25px;
+    }
+    .rule-type { margin-bottom: 10px; }
+    .rule-value { width: 100%; padding: 5px; font-family: monospace; }
+    .add-rule { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; }
+    .remove-rule { background: #f44336; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; float: right; }
+    .save-btn { background: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; margin-top: 10px; }
+    #status { margin-top: 10px; padding: 10px; border-radius: 3px; }
+    .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .help-text { font-size: 0.9em; color: #666; margin-top: 5px; }
+    .reorder-info {
+      background: #e7f3ff;
+      border: 1px solid #bee5eb;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      color: #0c5460;
+    }
+  </style>
+</head>
+<body>
+  <h2>QuickSpace Shortcut Settings</h2>
+  <p>Configure rules for elements you want triggered with the spacebar. You can use either CSS selectors or text-based matching:</p>
+  
+  <div class="reorder-info">
+    <strong>Tip:</strong> Drag and drop rules using the grip handle (::) to change their priority order. Rules are checked from top to bottom.
+  </div>
+  
+  <div id="rules-container"></div>
+  
+  <button id="add-rule" class="add-rule">Add New Rule</button>
+  <br>
+  <button id="save" class="save-btn">Save All Rules</button>
+  <div id="status"></div>
+  
+  <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+    <h3>Help:</h3>
+    <p><strong>CSS Selector:</strong> Use standard CSS selectors like <code>button.continue-btn</code> or <code>#submit-button</code></p>
+    <p><strong>Text Contains:</strong> Matches elements containing specific text, like <code>Continue</code> or <code>Next Question</code></p>
+    <p>Text matching is case-insensitive and works well for buttons with dynamic class names.</p>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>
