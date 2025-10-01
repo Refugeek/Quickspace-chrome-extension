@@ -114,6 +114,86 @@
     return false; // No visible element found
   }
 
+  let isProcessingShortcut = false;
+
+  function processShortcut() {
+    if (isProcessingShortcut) return;
+    
+    // Check if chrome.storage is available
+    if (!chrome || !chrome.storage || !chrome.storage.sync) {
+      console.warn("QuickSpace-Shortcut: Chrome storage API not available");
+      isProcessingShortcut = false;
+      return;
+    }
+    
+    isProcessingShortcut = true;
+
+    // Handle both old and new storage formats
+    chrome.storage.sync.get(["rules", "selectors"], (result) => {
+      let rules = [];
+      
+      if (result.rules) {
+        // New format
+        rules = result.rules;
+      } else if (result.selectors) {
+        // Old format - convert on the fly
+        rules = result.selectors.map(selector => ({
+          type: 'selector',
+          value: selector
+        }));
+      }
+
+      console.log("QuickSpace-Shortcut: Searching in frame", window.location.href);
+      console.log("QuickSpace-Shortcut: Processing", rules.length, "rules");
+
+      // Try each rule until one succeeds
+      for (const rule of rules) {
+        if (handleRule(rule)) {
+          break; // Stop after first successful click
+        }
+      }
+
+      isProcessingShortcut = false;
+    });
+  }
+
+  // Set up MutationObserver to watch for dynamically added content
+  const observer = new MutationObserver((mutations) => {
+    let shouldCheck = false;
+    
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+        // Check if any meaningful elements were added (not just text nodes)
+        for (const node of mutation.addedNodes) {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            shouldCheck = true;
+            break;
+          }
+        }
+      }
+    });
+    
+    if (shouldCheck) {
+      console.log("QuickSpace-Shortcut: DOM changed, updating available elements");
+    }
+  });
+
+  // Start observing when DOM is ready
+  if (document.body) {
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  } else {
+    // If body doesn't exist yet, wait for it
+    document.addEventListener('DOMContentLoaded', () => {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    });
+  }
+
   document.addEventListener(
     "keydown",
     (e) => {
@@ -128,32 +208,7 @@
       }
 
       e.preventDefault();
-
-      // Handle both old and new storage formats
-      chrome.storage.sync.get(["rules", "selectors"], (result) => {
-        let rules = [];
-        
-        if (result.rules) {
-          // New format
-          rules = result.rules;
-        } else if (result.selectors) {
-          // Old format - convert on the fly
-          rules = result.selectors.map(selector => ({
-            type: 'selector',
-            value: selector
-          }));
-        }
-
-        console.log("QuickSpace-Shortcut: Searching in frame", window.location.href);
-        console.log("QuickSpace-Shortcut: Processing", rules.length, "rules");
-
-        // Try each rule until one succeeds
-        for (const rule of rules) {
-          if (handleRule(rule)) {
-            break; // Stop after first successful click
-          }
-        }
-      });
+      processShortcut();
     },
     true
   );
